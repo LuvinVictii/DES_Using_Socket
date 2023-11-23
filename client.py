@@ -318,7 +318,7 @@ def key_exchange_client():
     rkb_rev = rkb[::-1]
     rk_rev = rk[::-1]
     decrypted_text = bin2hex(encrypt(ciphertext, rkb_rev, rk_rev))
-    print(f"Plaintext setelah didekripsi: {decrypted_text}")
+    print(f"Decrypted plaintext: {decrypted_text}")
 	
     
 
