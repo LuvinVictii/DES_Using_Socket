@@ -223,32 +223,32 @@ def encrypt(pt, rkb, rk):
 	cipher_text = permute(combine, final_perm, 64)
 	return cipher_text
 
-def key_exchange_client():
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def key_exchange_Host_B():
+    Host_B_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = socket.gethostname()
     port = 2222
-    client_socket.connect((host, port))
+    Host_B_socket.bind((host, port))
+    Host_B_socket.listen()
 
-    print(f"Connected to server on {host}:{port}")
+    print(f"Host_B work on {host}:{port}")
 
-    # Send key to server
+    Host_A_socket, addr = Host_B_socket.accept()
+    print(f"Receive connection from {addr}")
+
+    # Receive initial key from Host_A
+    # key = Host_A_socket.recv(1024).decode()
+    # print(f"Initial key from Host_A: {key}")
     key = "AABB09182736CCDD" # Changeable
-    # client_socket.send(key.encode())
 
-    # Receive confirmation from server
-    confirmation = client_socket.recv(1024).decode()
-    print(f"Confirmation from server: {confirmation}")
+    # Send confirmation to Host_A
+    Host_A_socket.send("Host_B is ready to receive encrypted text.".encode())
 
-    # Send plaintext to server
-    plaintext = "DAFFA11223344556" #Changeable
-    # client_socket.send(plaintext.encode())
-    # print(f"Plaintext sent to server: {plaintext}")
+    # Receive plaintext from Host_A
+    cipher_text = Host_A_socket.recv(1024).decode()
+    print(f"Cipher text received from Host_A: {cipher_text}")
 
-    # Receive ciphertext from server
-    # ciphertext = client_socket.recv(1024).decode()
-    # print(f"Ciphertext received from server: {ciphertext}")
-
-    # =========================================
+    # Plaintext encryption using DES
+    # ========================================================
     key_hex = key
     # Key generation
     # --hex to binary
@@ -262,10 +262,10 @@ def key_exchange_client():
         itung+=1
         temp.append(bit)
         if itung%4 == 0:
-            print(f"Binary from {key_hex[itung_k]} is {temp}")
+            print(f"binary from {key_hex[itung_k]} is {temp}")
             temp.clear()
             itung_k+=1
-    print(f"Combined binary: {key}\n")
+    print(f"combined binary from key: {key}\n")
 
     keyp = [57, 49, 41, 33, 25, 17, 9,
             1, 58, 50, 42, 34, 26, 18,
@@ -299,7 +299,7 @@ def key_exchange_client():
     rkb = [] # rkb for RoundKeys in binary
     rk = [] # rk for RoundKeys in hexadecimal
 
-    # looping for generate round key
+    # looping to generate round key
     for i in range(0, 16):
         # Shifting the bits by nth shifts by checking from shift table
         left = shift_left(left, shift_table[i])
@@ -312,29 +312,30 @@ def key_exchange_client():
         rkb.append(round_key)
         rk.append(bin2hex(round_key))
 
-
-    # =========================================
-	# Decrypt process
-    # rkb_rev = rkb[::-1]
-    # rk_rev = rk[::-1]
-    # decrypted_text = bin2hex(encrypt(ciphertext, rkb_rev, rk_rev))
-    # print(f"Decrypted plaintext: {decrypted_text}")
-    print(f"Plaintext from client: {plaintext}")
-    encrypted_text = bin2hex(encrypt(plaintext, rkb, rk))
-    print(f"Encrypted plaintext sent to server: {encrypted_text}")
-    client_socket.send(encrypted_text.encode())
-    
-    ciphertext = client_socket.recv(1024).decode()
-    print(f"Ciphertext received from server: {ciphertext}")
-
+    # ========================================================
+    print("Decryption")
     rkb_rev = rkb[::-1]
     rk_rev = rk[::-1]
-    decrypted_text = bin2hex(encrypt(ciphertext, rkb_rev, rk_rev))
+    decrypted_text = bin2hex(encrypt(cipher_text, rkb_rev, rk_rev))
 
-    print(f"Decrypted ciphertext received from server: {decrypted_text}")
+    print(f"Decrypted text from Host_A: {decrypted_text}")
+
+    # ========================================================
+    print("Message from Host_B")
+    # plaintext = "11223344556DAFFA" # Changeable
+    plaintext = input("Enter 16 character plaintext: ")
+    # print(f"Plaintext from Host_B: {plaintext}")
+    cipher_text = bin2hex(encrypt(plaintext, rkb, rk))
+
+    print(f"Chipertext sent to Host_A: {cipher_text}")
+
+    Host_A_socket.send(cipher_text.encode())
 
     # Close connection
-    client_socket.close()
+    Host_B_socket.close()
 
 if __name__ == "__main__":
-    key_exchange_client()
+    key_exchange_Host_B()
+
+
+
