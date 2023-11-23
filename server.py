@@ -1,7 +1,5 @@
 import socket
 
-
-# Fungsi untuk mengkonversi dari hexadecimal ke binary
 def hex2bin(s):
 	mp = {'0': "0000",
 		'1': "0001",
@@ -23,9 +21,6 @@ def hex2bin(s):
 	for i in range(len(s)):
 		bin = bin + mp[s[i]]
 	return bin
-
-
-# Fungsi untuk mengkonversi dari binary ke hexadecimal
 
 def bin2hex(s):
 	mp = {"0000": '0',
@@ -55,9 +50,6 @@ def bin2hex(s):
 
 	return hex
 
-
-# Fungsi untuk mengkonversi dari binary ke decimal
-
 def bin2dec(binary):
 
 	decimal, i = 0, 0
@@ -67,9 +59,6 @@ def bin2dec(binary):
 		binary = binary//10
 		i += 1
 	return decimal
-
-
-# Fungsi untuk mengkonversi dari decimal ke binary
 
 def dec2bin(num):
 	res = bin(num).replace("0b", "")
@@ -81,19 +70,13 @@ def dec2bin(num):
 			res = '0' + res
 	return res
 
-
-# fungsi untuk melakukan permutation
-
-def permute(k, arr, n): 	#contoh pt = permute(pt, initial_perm, 64)
+def permute(k, arr, n): 	
 	permutation = ""
 	for i in range(0, n):
 		permutation = permutation + k[arr[i] - 1]
 	return permutation
 
-
-# fungsi untuk melakukan shift left
-
-def shift_left(k, nth_shifts): 	# contoh : left = shift_left(left, shift_table[i])
+def shift_left(k, nth_shifts):
 	s = ""
 	for i in range(nth_shifts):
 		for j in range(1, len(k)):
@@ -102,9 +85,6 @@ def shift_left(k, nth_shifts): 	# contoh : left = shift_left(left, shift_table[i
 		k = s
 		s = ""
 	return k
-
-
-# fungsi untuk melakukan operasi xor antara dua nilai biner dari string a dan b
 
 def xor(a, b):
 	ans = ""
@@ -116,7 +96,7 @@ def xor(a, b):
 	return ans
 
 
-# Tabel angka yang digunakan dalam proses initial permutation
+# Table of Position of 64 bits at initial level: Initial Permutation Table
 initial_perm = [58, 50, 42, 34, 26, 18, 10, 2,
 				60, 52, 44, 36, 28, 20, 12, 4,
 				62, 54, 46, 38, 30, 22, 14, 6,
@@ -126,8 +106,7 @@ initial_perm = [58, 50, 42, 34, 26, 18, 10, 2,
 				61, 53, 45, 37, 29, 21, 13, 5,
 				63, 55, 47, 39, 31, 23, 15, 7]
 
-# Tabel angka yang digunakan untuk Expansion D-box Table = mengekspansi dari 32 bit menjadi 48 bits agar dapat di xor dengan round key
-# ada yang diduplikat buat ekspansinya, seperti 4, 5, 8, 9, dll
+# Expansion D-box Table
 exp_d = [32, 1, 2, 3, 4, 5, 4, 5,
 		6, 7, 8, 9, 8, 9, 10, 11,
 		12, 13, 12, 13, 14, 15, 16, 17,
@@ -135,7 +114,7 @@ exp_d = [32, 1, 2, 3, 4, 5, 4, 5,
 		22, 23, 24, 25, 24, 25, 26, 27,
 		28, 29, 28, 29, 30, 31, 32, 1]
 
-# Permutation Table (Transposition P-Box)
+# Straight Permutation Table
 per = [16, 7, 20, 21,
 	29, 12, 28, 17,
 	1, 15, 23, 26,
@@ -186,7 +165,7 @@ sbox = [[[14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7],
 		[7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8],
 		[2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11]]]
 
-# Tabel angka untuk mengoperasikan final permutation yang akan mengoutputkan chiper text
+# Final Permutation Table
 final_perm = [40, 8, 48, 16, 56, 24, 64, 32,
 			39, 7, 47, 15, 55, 23, 63, 31,
 			38, 6, 46, 14, 54, 22, 62, 30,
@@ -218,14 +197,13 @@ def encrypt(pt, rkb, rk):
 		# S-boxex: substituting the value from s-box table by calculating row and column
 		sbox_str = ""
 		for j in range(0, 8): # 100101
-			row = bin2dec(int(xor_x[j * 6] + xor_x[j * 6 + 5])) #mengambil index row di tabel sbox lewat angka ke "[0]"+"[5]"
+			row = bin2dec(int(xor_x[j * 6] + xor_x[j * 6 + 5])) 
 			col = bin2dec(
 				int(xor_x[j * 6 + 1] + xor_x[j * 6 + 2] + xor_x[j * 6 + 3] + xor_x[j * 6 + 4]))
 			val = sbox[j][row][col]
 			sbox_str = sbox_str + dec2bin(val)
 
 		# Straight D-box: After substituting rearranging the bits
-		# Transposition P-Box
 		sbox_str = permute(sbox_str, per, 32) 
 
 		# XOR left and sbox_str
@@ -245,7 +223,6 @@ def encrypt(pt, rkb, rk):
 	cipher_text = permute(combine, final_perm, 64)
 	return cipher_text
 
-
 def key_exchange_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = socket.gethostname()
@@ -253,30 +230,30 @@ def key_exchange_server():
     server_socket.bind((host, port))
     server_socket.listen()
 
-    print(f"Server berjalan di {host}:{port}")
+    print(f"Server work on {host}:{port}")
 
     client_socket, addr = server_socket.accept()
-    print(f"Menerima koneksi dari {addr}")
+    print(f"Receive connection from {addr}")
 
-    # Menerima kunci awal dari client
+    # Receive initial key from client
     key = client_socket.recv(1024).decode()
-    print(f"Kunci awal yang diterima dari client: {key}")
+    print(f"Initial key from client: {key}")
 
-    # Kirim konfirmasi bahwa server siap menerima plaintext
+    # Send confirmation to client
     client_socket.send("Server is ready to receive plaintext.".encode())
 
-    # Menerima plaintext dari client
+    # Receive plaintext from client
     plaintext = client_socket.recv(1024).decode()
-    print(f"Plaintext yang diterima dari client: {plaintext}")
+    print(f"Plaintext received from client: {plaintext}")
 
-    # Proses enkripsi plaintext menggunakan DES
+    # Plaintext encryption using DES
     # ========================================================
     key_hex = key
     # Key generation
     # --hex to binary
     key = hex2bin(key)
 
-    print("key setelah jadi biner: ")
+    print("key after hex to bin: ")
     temp = []
     itung = 0
     itung_k = 0
@@ -284,12 +261,11 @@ def key_exchange_server():
         itung+=1
         temp.append(bit)
         if itung%4 == 0:
-            print(f"biner dari {key_hex[itung_k]} adalah {temp}")
+            print(f"binary from {key_hex[itung_k]} is {temp}")
             temp.clear()
             itung_k+=1
-    print(f"biner gabungan dari key: {key}\n")
+    print(f"combined binary from key: {key}\n")
 
-    # Tabel angka yang digunakan untuk menjadikan 64 bit initial key menjadi 56 bit efektif key
     keyp = [57, 49, 41, 33, 25, 17, 9,
             1, 58, 50, 42, 34, 26, 18,
             10, 2, 59, 51, 43, 35, 27,
@@ -299,17 +275,13 @@ def key_exchange_server():
             14, 6, 61, 53, 45, 37, 29,
             21, 13, 5, 28, 20, 12, 4]
 
-    # proses mendrop bit-bit tertentu agar bisa dari 64 menjadi 56 bit
     key = permute(key, keyp, 56)
 
-    # Tabel yang berisi angka-angka yang dipakai untuk melakukan shift table
-    # setiap bit ke 1, 2, 9, 16 geser 1 posisi
     shift_table = [1, 1, 2, 2,
                 2, 2, 2, 2,
                 1, 2, 2, 2,
                 2, 2, 2, 1]
 
-    # Key- Compression Table : mengkompres dari 56 bit menjadi 48 bit
     key_comp = [14, 17, 11, 24, 1, 5,
                 3, 28, 15, 6, 21, 10,
                 23, 19, 12, 4, 26, 8,
@@ -326,16 +298,14 @@ def key_exchange_server():
     rkb = [] # rkb for RoundKeys in binary
     rk = [] # rk for RoundKeys in hexadecimal
 
-    # looping untuk mengenerate round key
+    # looping to generate round key
     for i in range(0, 16):
         # Shifting the bits by nth shifts by checking from shift table
         left = shift_left(left, shift_table[i])
         right = shift_left(right, shift_table[i])
 
-        # mengkombinasikan hasil splitting kiri dan kanan untuk dikompress menjadi 48 bit
         combine_str = left + right
 
-        # Proses kompress key dari 56 bit menjadi 48 bit round key menggunakan permuted
         round_key = permute(combine_str, key_comp, 48)
 
         rkb.append(round_key)
@@ -346,13 +316,12 @@ def key_exchange_server():
     print("Encryption")
     cipher_text = bin2hex(encrypt(plaintext, rkb, rk))
 
-    print(f"Chipertext yang dikirim ke client: {cipher_text}")
-    # client_socket.send("Server have sent the chipertext".encode())
+    print(f"Chipertext sent to client: {cipher_text}")
 
-    # Kirim ciphertext ke client
+    # Send chipertext to client
     client_socket.send(cipher_text.encode())
 
-    # Tutup koneksi
+    # Close connection
     server_socket.close()
 
 if __name__ == "__main__":
